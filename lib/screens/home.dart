@@ -42,13 +42,13 @@ class _HomePageState extends State<HomePage> {
 
   Future loadModel() async {
     await Tflite.loadModel(
-        model: 'assets/model_unquant.tflite', labels: 'assets/labels.txt');
+        model: 'assets/model.tflite', labels: 'assets/labels.txt');
   }
 
   classifyImage(File image) async {
     output = await Tflite.runModelOnImage(
         path: image.path,
-        numResults: 2,
+        numResults: 5,
         threshold: 0.5,
         imageMean: 127.5,
         imageStd: 127.5);
@@ -163,181 +163,229 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color(0xFF101010),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              // ignore: prefer_const_literals_to_create_immutables
-              children: [
-                // ignore: prefer_const_constructors
-                SizedBox(
-                  height: 100,
-                ),
-                // ignore: prefer_const_constructors
-                Text(
-                  'Teachable Machine CNN',
-                  // ignore: prefer_const_constructors
-                  style: TextStyle(
-                    color: const Color(0xFFEEDA28),
-                    fontSize: 15,
+          child: Stack(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width * 0.17,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.004, 1],
+                        colors: [
+                          Color(0xFFa8e063),
+                          Color(0xFF56ab2f),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  height: 6,
-                ),
-                const Text(
-                  'Detect Flowers',
-                  style: TextStyle(
-                    color: Color(0xFFE99600),
-                    fontWeight: FontWeight.w500,
-                    fontSize: 28,
+                  Container(
+                    height: MediaQuery.of(context).size.height,
+                    color: Colors.white,
+                    width: MediaQuery.of(context).size.width * 0.83,
                   ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
                 ),
-                const SizedBox(
-                  height: 50,
-                ),
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        color: Colors.transparent,
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height - 400,
-                        child: FutureBuilder<void>(
-                          future: getLostData(),
-                          builder:
-                              (BuildContext context, AsyncSnapshot<void> snapshot) {
-                            switch (snapshot.connectionState) {
-                              case ConnectionState.none:
-                              case ConnectionState.waiting:
-                                return Image.asset(
-                                  'assets/flower.png',
-                                  fit: BoxFit.fill,
-                                );
-                              case ConnectionState.done:
-                                return displayImage();
-                              default:
-                                if (snapshot.hasError) {
-                                  return onErrorDisplay(
-                                      context, snapshot.error.toString());
-                                } else {
-                                  return Image.asset(
-                                    'assets/flower.png',
-                                    fit: BoxFit.fill,
-                                  );
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    SizedBox(
+                      height: 100,
+                    ),
+                    Text(
+                      'Teachable Machine CNN',
+                      style: TextStyle(
+                        color: const Color(0xFFEEDA28),
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 6,
+                    ),
+                    const Text(
+                      'Detect Flowers',
+                      style: TextStyle(
+                        color: Color(0xFFE99600),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 28,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            color: Colors.transparent,
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height - 400,
+                            child: FutureBuilder<void>(
+                              future: getLostData(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<void> snapshot) {
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.none:
+                                  case ConnectionState.waiting:
+                                    return Image.asset(
+                                      'assets/flower.png',
+                                      fit: BoxFit.fill,
+                                    );
+                                  case ConnectionState.done:
+                                    return displayImage();
+                                  default:
+                                    if (snapshot.hasError) {
+                                      return onErrorDisplay(
+                                          context, snapshot.error.toString());
+                                    } else {
+                                      return Image.asset(
+                                        'assets/flower.png',
+                                        fit: BoxFit.fill,
+                                      );
+                                    }
                                 }
-                            }
-                          },
-                        ),
-                      ),
-                      (output != null) ? Divider(height: 10, color: Colors.transparent,) : SizedBox(),
-                      (output != null) ? Text('${output![0]['label']}') : SizedBox(), 
-                      // (output == null) ? Divider(height: 10, color: Colors.transparent,) : null,
-                    ],
-                  ),
-                ),
-                Divider(
-                  color: Colors.transparent,
-                  height: 10,
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            chooseImageFromGallery = false;
-                          });
-                          pickImage();
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width - 20,
-                          alignment: Alignment.center,
-                          // ignore: prefer_const_constructors
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 17,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFE99600,
+                              },
                             ),
-                            borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Text('Take a picture'),
-                        ),
+                          (output != null)
+                              ? Divider(
+                                  height: 10,
+                                  color: Colors.transparent,
+                                )
+                              : SizedBox(),
+                          (output != null)
+                              ? Text(
+                                  '${output![0]['label']}',
+                                  // style: TextStyle(color: Colors.white),
+                                )
+                              : SizedBox(),
+                          // (output == null) ? Divider(height: 10, color: Colors.transparent,) : null,
+                        ],
                       ),
-                      Divider(
-                        color: Colors.transparent,
-                        height: 10,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            chooseImageFromGallery = true;
-                          });
-                          pickImage();
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width - 20,
-                          alignment: Alignment.center,
-                          // ignore: prefer_const_constructors
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 17,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFE99600,
+                    ),
+                    Divider(
+                      color: Colors.transparent,
+                      height: 20,
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                chooseImageFromGallery = false;
+                              });
+                              pickImage();
+                            },
+                            child: Container(
+                              width: MediaQuery.of(context).size.width - 20,
+                              alignment: Alignment.center,
+                              // ignore: prefer_const_constructors
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 17,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  stops: const [0.004, 1],
+                                  colors: [
+                                    Color(0xFFa8e063),
+                                    Color(0xFF56ab2f),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text('Take a picture'),
                             ),
-                            borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Text('Choose a picture from gallery'),
-                        ),
-                      ),
-                      Divider(
-                        color: Colors.transparent,
-                        height: 10,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            imagePath = '';
-                            _image = null;
-                            pickedFile = null;
-                            _retrieveDataError = null;
-                          });
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width - 20,
-                          alignment: Alignment.center,
-                          // ignore: prefer_const_constructors
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 17,
+                          Divider(
+                            color: Colors.transparent,
+                            height: 10,
                           ),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFE99600,
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                chooseImageFromGallery = true;
+                              });
+                              pickImage();
+                            },
+                            child: Container(
+                              width: MediaQuery.of(context).size.width - 20,
+                              alignment: Alignment.center,
+                              // ignore: prefer_const_constructors
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 17,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  stops: const [0.004, 1],
+                                  colors: [
+                                    Color(0xFFa8e063),
+                                    Color(0xFF56ab2f),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text('Choose a picture from gallery'),
                             ),
-                            borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Text('Reset to defaults'),
-                        ),
+                          Divider(
+                            color: Colors.transparent,
+                            height: 10,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                imagePath = '';
+                                _image = null;
+                                pickedFile = null;
+                                _retrieveDataError = null;
+                                output = null;
+                              });
+                            },
+                            child: Container(
+                              width: MediaQuery.of(context).size.width - 20,
+                              alignment: Alignment.center,
+                              // ignore: prefer_const_constructors
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 17,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  stops: const [0.004, 1],
+                                  colors: [
+                                    Color(0xFFa8e063),
+                                    Color(0xFF56ab2f),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text('Reset to defaults'),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    Divider(
+                      color: Colors.transparent,
+                      height: 10,
+                    ),
+                  ],
                 ),
-                Divider(
-                  color: Colors.transparent,
-                  height: 10,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
